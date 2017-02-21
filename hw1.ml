@@ -43,12 +43,13 @@ let rec power x y = match (x, y) with
 let rec append x y = match x with
     Nil -> y
     | Cons (head, tail) -> Cons (head, (append tail y));;
-
+(*
 let rec rev x = match x with
     Nil -> Nil
     | Cons (head, tail) -> match Cons (head, tail) with
+*)
 
-
+let rev x = failwith "Not implemented";;
 let merge_sort x = failwith "Not implemented";;
                      
 let string_of_lambda x = failwith "Not implemented";;

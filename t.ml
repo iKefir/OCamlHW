@@ -1,6 +1,6 @@
 open Hw1;;
 
-print_string("----FIRST PART----\n\n")
+print_string("----FIRST PART----\n\n");;
 
 print_string("int_of_peano\n");;
 print_int (int_of_peano (S (S (Z))));;
