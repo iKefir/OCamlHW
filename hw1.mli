@@ -11,11 +11,11 @@ val mul: peano -> peano -> peano
 val div: peano -> peano -> peano
 val power: peano -> peano -> peano
 
-type 'a list = Nil | Cons of ('a * 'a list)
-
 val append: 'a list -> 'a list -> 'a list
+val print_list: int list -> unit
 val rev: 'a list -> 'a list
 val merge_sort: 'a list -> 'a list
+val split: 'a list -> 'a list * 'a list
 
 type lambda = Var of string | Abs of string * lambda | App of lambda * lambda
 
