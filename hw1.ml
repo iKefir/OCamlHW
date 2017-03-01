@@ -76,28 +76,53 @@ let rec string_of_lambda x = match x with
     | App (a, b) -> (string_of_lambda a) ^ " " ^ (string_of_lambda b)
     | Abs (a, b) -> "\\" ^ a ^ "." ^ (string_of_lambda b);;
 
-let lambda_of_string x = failwith "Not implemented";;
-(*
-let lambda_of_string x = 
+
+let lambda_of_string s = 
     let s = s ^ ";" in
     let pos = ref 0 in
-    let get() = s[pos] in
+    let get() = s.[!pos] in
     let next () = if !pos < String.length s - 1 then pos := !pos + 1 in
     let eat x = if get() <> x then failwith "Exception" else next() in
 
-    let rec parse_abs () = 
-        eat "\\";
-        let v = parse_ident () in eat ".";
-        let l = parse_lambda () in 
-        Abs (v, l) in
+    let parse_string() =
+        String.make (1) (get()) in
 
-    let parse_ident () =
+    let parse_ident() =
+        let l = (parse_string()) in
+        Var (l) in
+
+    let rec parse_lambda() = match (get ()) with
+        | '\\' -> 
+        let rec big_parse res = 
+        if ((!pos = String.length s - 1))
+            then res
+            else App (res, big_parse (parse_lambda())) in
+            big_parse (
+                                let parse_abs() = 
+                                eat '\\';
+                                let v = parse_string() in eat '.';
+                                let l = parse_lambda() in 
+                                Abs (v, l) in
+                                parse_abs()
+                            )
+        | '(' ->
+            eat '(';
+            let smres = parse_lambda () in
+            eat ')';
+            let rec big_parse res = 
+                if ((!pos = String.length s - 1))
+                then res
+                else App (res, big_parse (parse_lambda()))
+            in big_parse smres
+        | _ -> let rec big_parse res = 
+                if ((!pos = String.length s - 1))
+                then res
+                else App (res, big_parse (parse_lambda()))
+            in big_parse(parse_ident()) in
+
+    parse_lambda();;
 
 
-        Var (l)
-
-
-*)
 
 
 
