@@ -85,40 +85,36 @@ let lambda_of_string s =
     let eat x = if get() <> x then failwith "Exception" else next() in
 
     let parse_string() =
-        String.make (1) (get()) in
+        let ans = String.make (1) (get()) in next();
+        ans in
 
     let parse_ident() =
         let l = (parse_string()) in
         Var (l) in
 
-    let rec parse_lambda() = match (get ()) with
-        | '\\' -> 
-        let rec big_parse res = 
-        if ((!pos = String.length s - 1))
+    let rec parse_abs() = 
+        eat '\\';
+        let v = parse_string() in eat '.';
+        let l = parse_lambda() in 
+        Abs (v, l)
+
+        and big_parse res = 
+        if ((!pos = String.length s - 1) || get() = ')')
             then res
-            else App (res, big_parse (parse_lambda())) in
-            big_parse (
-                                let parse_abs() = 
-                                eat '\\';
-                                let v = parse_string() in eat '.';
-                                let l = parse_lambda() in 
-                                Abs (v, l) in
-                                parse_abs()
-                            )
+            else big_parse_sec res
+
+        and big_parse_sec res = 
+            next();
+            big_parse (App (res, parse_lambda()))
+
+        and parse_lambda() = match (get ()) with
+        | '\\' -> big_parse (parse_abs())
         | '(' ->
             eat '(';
-            let smres = parse_lambda () in
+            let s = parse_lambda () in
             eat ')';
-            let rec big_parse res = 
-                if ((!pos = String.length s - 1))
-                then res
-                else App (res, big_parse (parse_lambda()))
-            in big_parse smres
-        | _ -> let rec big_parse res = 
-                if ((!pos = String.length s - 1))
-                then res
-                else App (res, big_parse (parse_lambda()))
-            in big_parse(parse_ident()) in
+            big_parse s
+        | _ -> big_parse (parse_ident()) in
 
     parse_lambda();;
 
