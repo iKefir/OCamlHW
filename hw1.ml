@@ -100,9 +100,6 @@ let lambda_of_string s =
 
     let parse_string() = parse_string_help ("") in
 
-    (* let parse_string() = let ans = (String.make (1) (get())) in next();
-                            ans in  *)
-
     let parse_ident() =
         let l = (parse_string()) in
         Var (l) in
@@ -132,6 +129,58 @@ let lambda_of_string s =
         | _ -> big_parse (parse_ident()) in
 
     parse_lambda();;
+
+(* a instead str in b *)
+let rec subst a b str = match b with
+    | Var x -> if (x = str) then a else Var x
+    | App (x, y) -> App (subst a x str, subst a y str)
+    | Abs (x, lambda) -> Abs (x, subst a lambda str)
+
+(* a instead str in b *)
+let rec free_subst a b str = 
+
+    let rec new_intersection lambda str used_list = match lambda with
+        | Var x -> ((x = str) && (not (List.mem x used_list)))
+        | App (x, y) -> ((new_intersection x str used_list) || (new_intersection y str used_list))
+        | Abs (x, lambda) -> (new_intersection lambda str (x::used_list)) in
+
+    let rec free_subst_help b used_list has_intersections = match b with
+        | Var x -> 
+            (
+                (
+                    (x = str) && 
+                    (
+                        (
+                            (not (List.mem x used_list)) && (not has_intersections)
+                        ) || (
+                            (List.mem x used_list)
+                        )
+                    )
+                ) || (
+                    not(x = str)
+                )
+            )
+        | App (x, y) -> ((free_subst_help x used_list has_intersections) && (free_subst_help y used_list has_intersections))
+        | Abs (x, lambda) -> (free_subst_help lambda (x::used_list) (has_intersections || (new_intersection a x []))) 
+
+    in free_subst_help b [] false;;
+
+let rec alpha_eq a b = 
+    let ctr = ref 0 in
+    let next() = ctr := !ctr + 1 in
+    let get_subst_arg() = Var ("subst_arg" ^ (string_of_int !ctr)) in
+
+    let rec alpha_eq_help a b = match (a, b) with
+    | (Var ax, Var bx) -> ax = bx
+    | (App (a1, a2), App (b1, b2)) -> ((alpha_eq_help a1 b1) && (alpha_eq_help a2 b2))
+    | (Abs (ax, alambda), Abs (bx, blambda)) -> 
+        if ((free_subst (get_subst_arg()) alambda ax) && (free_subst (get_subst_arg()) blambda bx)) then
+            (alpha_eq_help (subst (get_subst_arg()) alambda ax) (subst (get_subst_arg()) blambda bx)) 
+        else    (next();
+                alpha_eq_help a b)
+    | _ -> false
+
+in alpha_eq_help a b;;
 
 
 
