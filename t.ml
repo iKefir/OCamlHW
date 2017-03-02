@@ -66,7 +66,11 @@ print_string("\n\n");;
 print_string (string_of_lambda (lambda_of_string "b \\x.\\y.a"));;
 print_string("\n\n");;
 
-print_string (string_of_lambda(lambda_of_string (string_of_lambda (lambda_of_string "b \\x.\\y.a"))));;
+print_string("b \\x.\\y.a");;
+print_string("\n");;
+print_string(string_of_lambda(lambda_of_string "b \\x.\\y.a"));;
+print_string("\n");;
+print_string(string_of_lambda(lambda_of_string (string_of_lambda (lambda_of_string "b \\x.\\y.a"))));;
 print_string("\n\n");;
 
 print_string (string_of_lambda(lambda_of_string (string_of_lambda (lambda_of_string "(b (\\x.(\\y.a)))"))));;

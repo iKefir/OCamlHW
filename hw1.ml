@@ -70,11 +70,16 @@ let rec merge_sort x = match x with
             | false -> bhead :: (merge a btail) in
                 let (alist, blist) = split x in
         merge (merge_sort alist) (merge_sort blist);;
+
+let rec debug_string_of_lambda x = match x with
+    | Var a -> "Var " ^ a
+    | App (a, b) -> "App (" ^ (debug_string_of_lambda a) ^ " " ^ (debug_string_of_lambda b) ^ ")"
+    | Abs (a, b) -> "Abs (\\" ^ a ^ ".(" ^ (debug_string_of_lambda b) ^ "))";;
                      
 let rec string_of_lambda x = match x with
     | Var a -> a
-    | App (a, b) -> (string_of_lambda a) ^ " " ^ (string_of_lambda b)
-    | Abs (a, b) -> "\\" ^ a ^ "." ^ (string_of_lambda b);;
+    | App (a, b) -> "(" ^ (string_of_lambda a) ^ " " ^ (string_of_lambda b) ^ ")"
+    | Abs (a, b) -> "(\\" ^ a ^ "." ^ (string_of_lambda b) ^ ")";;
 
 
 let lambda_of_string s = 
@@ -84,9 +89,19 @@ let lambda_of_string s =
     let next () = if !pos < String.length s - 1 then pos := !pos + 1 in
     let eat x = if get() <> x then failwith "Exception" else next() in
 
-    let parse_string() =
-        let ans = String.make (1) (get()) in next();
-        ans in
+    let rec parse_string_help acc = match get() with
+            | ' ' -> acc
+            | '.' -> acc
+            | '(' -> acc
+            | ')' -> acc
+            | ';' -> acc
+            | _ -> let cur_char = get() in next(); 
+                    parse_string_help (acc ^ (String.make (1) (cur_char))) in 
+
+    let parse_string() = parse_string_help ("") in
+
+    (* let parse_string() = let ans = (String.make (1) (get())) in next();
+                            ans in  *)
 
     let parse_ident() =
         let l = (parse_string()) in
