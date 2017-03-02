@@ -85,6 +85,12 @@ print_string("-----SECOND HW----\n\n");;
 print_string("alpha_eq\n");;
 print_string(string_of_bool (alpha_eq (lambda_of_string "\\x.\\y.x") (lambda_of_string "\\x.\\y.x")));;
 print_string("\n");;
+print_string(string_of_bool (alpha_eq (lambda_of_string "\\y.\\x.y") (lambda_of_string "\\x.\\y.x")));;
+print_string("\n");;
+print_string(string_of_bool (alpha_eq (lambda_of_string "y x") (lambda_of_string "x y")));;
+print_string("\n");;
+print_string(string_of_bool (alpha_eq (lambda_of_string "\\x.\\subst_arg0.x subst_arg0") (lambda_of_string "\\y.\\subst_arg0.y subst_arg0")));;
+print_string("\n");;
 print_string(string_of_bool (alpha_eq (lambda_of_string "\\x.\\y.x") (lambda_of_string "b \\x.\\y.x")));;
 print_string("\n\n");;
 
