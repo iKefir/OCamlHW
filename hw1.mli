@@ -12,7 +12,9 @@ val div: peano -> peano -> peano
 val power: peano -> peano -> peano
 
 val append: 'a list -> 'a list -> 'a list
-val print_list: int list -> unit
+val print_int_list: int list -> unit
+val print_string_list: string list -> unit
+
 val rev: 'a list -> 'a list
 val merge_sort: 'a list -> 'a list
 val split: 'a list -> 'a list * 'a list
@@ -22,7 +24,3 @@ type lambda = Var of string | Abs of string * lambda | App of lambda * lambda
 val string_of_lambda: lambda -> string
 val debug_string_of_lambda: lambda -> string
 val lambda_of_string: string -> lambda
-
-val alpha_eq: lambda -> lambda -> bool
-val free_subst: lambda -> lambda -> string -> bool
-val subst: lambda -> lambda -> string -> lambda
