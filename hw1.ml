@@ -65,6 +65,7 @@ let split x =
     split_def x [] [];;
 
 let rec merge_sort x = match x with
+    | [] -> []
     | head :: [] -> x
     | _ -> let rec merge a b = match (a, b) with
         | ([], []) -> []

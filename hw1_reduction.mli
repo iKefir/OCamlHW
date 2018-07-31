@@ -4,8 +4,6 @@ open Hw1
    что подставляем, где подставляем, вместо чего подставляем *)
 val free_to_subst: lambda -> lambda -> string -> bool
 
-val subst: lambda -> lambda -> string -> lambda
-
 (* Вернуть список имён свободных переменных *)
 val free_vars: lambda -> string list
 
@@ -16,8 +14,11 @@ val is_normal_form: lambda -> bool
 val is_alpha_equivalent: lambda -> lambda -> bool
 
 (* Выполнить один шаг бета-редукции, используя нормальный порядок *)
-(* val normal_beta_reduction: lambda -> lambda *)
+(* val helper_normal_beta_reduction: lambda -> lambda *)
+val normal_beta_reduction: lambda -> lambda
 
+
+(* https://en.wikipedia.org/wiki/De_Bruijn_index *)
 (* Свести выражение к нормальной форме с использованием нормального
    порядка редукции; реализация должна быть эффективной: использовать
    мемоизацию *)
