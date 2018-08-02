@@ -1,6 +1,7 @@
 open Hw1;;
 open Hw1_reduction;;
 open Hw2_unify;;
+open Hw2_inference;;
 
 print_string("------FIRST HW----\n\n");;
 
@@ -46,17 +47,17 @@ print_string("\n\n");;
 print_string("\n\n---SECOND PART----\n\n");;
 
 print_string("rev\n");;
-print_int_list (rev (6 :: 7 :: []));;
+print_int_list (rev ([6; 7]));;
 print_string("\n");;
 
-print_int_list (rev (rev (6 :: 7 :: [])));;
+print_int_list (rev (rev ([6; 7])));;
 print_string("\n\n");;
 
 print_string("merge_sort\n");;
-print_int_list (merge_sort (6 :: 7 :: []));;
+print_int_list (merge_sort ([6; 7]));;
 print_string("\n");;
 
-print_int_list (merge_sort (6 :: 7 :: 1 :: 2 :: 3 :: 19 :: []));;
+print_int_list (merge_sort ([6; 7; 1; 2; 3; 19]));;
 print_string("\n\n");;
 
 print_string("\n\n----THIRD PART----\n\n");;
@@ -165,17 +166,6 @@ print_string_list(free_vars (lambda_of_string ("(\\x.\\y.x) y")));;
 print_string("\n");;
 print_string("\n\n");;
 
-(* let que = ref (Queue.create ());;
-
-Queue.add 1 !que;;
-Queue.add 2 !que;;
-Queue.add 3 !que;;
-
-que := Queue.of_seq (Seq.map (fun num -> num * 2) (Queue.to_seq !que));;
-
-print_int(Queue.pop !que);;
-print_int(Queue.pop !que);;
-print_int(Queue.pop !que);; *)
 print_string("------THIRD HW----\n\n");;
 print_string("system_to_equation\n");;
 
@@ -241,35 +231,21 @@ let check_correctness sys res = match res with
                     print_string("\n\n");;
 
 check_correctness sys res;;
+(* TODO: good tests, not this something*)
+print_string("-----FOURTH HW----\n\n");;
 
-let eqt11 = Fun("x", [Var "p1"]), Fun("x", [Var "p2"]);;
-let eqt12 = Fun("y", [Var "p2"]), Fun("y", [Var "p4"]);;
-let eqt13 = Fun("z", [Var "p5"]), Fun("z", [Var "p6"]);;
+let print_s_type s_t = print_string(string_of_s_type s_t);;
 
-let eqt21 = Fun("x", [Var "p1"]), Fun("x", [Var "p2"]);;
-let eqt22 = Fun("m", [Var "p1"]), Fun("y", [Var "p4"]);;
-let eqt23 = Fun("z", [Var "p5"]), Fun("z", [Var "p6"]);;
+let lambda1 = Abs ("f", Abs ("x", App (Var "f", App (Var "f", Var "x"))));;
 
-let eqt31 = Fun("x", [Var "p1"]), Fun("x", [Var "p2"]);;
-let eqt32 = Fun("y", [Var "p1"]), Fun("y", [Var "p4"]);;
-let eqt33 = Fun("z", [Var "p1"]), Fun("z", [Var "p6"]);;
+let check_infer_type lambda = match infer_simp_type lambda with
+    | None -> print_string("Failed to infer\n\n")
+    | Some (l, res) -> print_string("Substs:\n");
+                       List.iter (fun (key, s_t) -> print_string(key ^ " = " ^ (string_of_s_type s_t) ^ "\n")) l;
+                       print_string("Inferred type:\n");
+                       print_s_type res;
+                       print_string("\n\n");;
 
-let eqt41 = Fun("a", [Var "tx"; Fun("a", [Var "ty"; Fun("a", [Var "tz";Var "t2"])])]), Fun("a", [Fun("a", [Var "ta"; Fun("a", [Var "tb"; Var "ta"])]); Var "t1"]);;
-let eqt42 = Var("ty"), Fun("a", [Var "tz"; Var "t4"]);;
-let eqt43 = Var("tx"), Fun("a", [Var "tz"; Var "t3"]);;
-let eqt44 = Var("t3"), Fun("a", [Var "t4"; Var "t2"]);;
-
-let sym1 = [eqt11; eqt12; eqt13];;
-let sym2 = [eqt21; eqt22; eqt23];;
-let sym3 = [eqt31; eqt32; eqt33];;
-let sym4 = [eqt41; eqt42; eqt43; eqt44];;
-
-let ans_sym1 = solve_system sym1;;
-let ans_sym2 = solve_system sym2;;
-let ans_sym3 = solve_system sym3;;
-let ans_sym4 = solve_system sym4;;
-
-check_correctness sym1 ans_sym1;;
-check_correctness sym2 ans_sym2;;
-check_correctness sym3 ans_sym3;;
-check_correctness sym4 ans_sym4;;
+check_infer_type lambda1;;
+print_string("\n");;
+check_infer_type (lambda_of_string "\\a.\\b.\\c.\\d.\\e.\\f.\\g.(a b c d e f g)");;

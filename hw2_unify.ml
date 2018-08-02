@@ -17,21 +17,21 @@ let system_to_equation sys =
         | Var _ -> []
         | Fun (f, lst) -> f :: List.concat (List.map get_term_f_names lst) in
 
-    let get_eq_f_names tt = (match tt with (term1, term2) -> List.append (get_term_f_names term1) (get_term_f_names term2)) in
+    let get_eq_f_names (term1, term2) = List.append (get_term_f_names term1) (get_term_f_names term2) in
 
-    let get_sys_f_names() = List.concat (List.map get_eq_f_names sys) in
+    let get_sys_f_names () = List.concat (List.map get_eq_f_names sys) in
 
     let ctr = ref 0 in
 
-    let give_name() = ctr := !ctr + 1; "fun_name" ^  (string_of_int !ctr) in
+    let give_name () = ctr := !ctr + 1; "fun_name" ^  (string_of_int !ctr) in
 
-    let new_f_name() =
-        let try_name = ref (give_name()) in
-        let f_names = get_sys_f_names() in
-        while (List.mem !try_name f_names) do try_name := give_name() done;
+    let new_f_name () =
+        let try_name = ref (give_name ()) in
+        let f_names = get_sys_f_names () in
+        while (List.mem !try_name f_names) do try_name := give_name () done;
         !try_name in
 
-    let f_name = new_f_name() in
+    let f_name = new_f_name () in
     let rec help lst = match lst with
         | [] -> ([], [])
         | (term1, term2) :: other -> match (help other) with | (l1, l2) -> (term1 :: l1, term2 :: l2) in
@@ -89,6 +89,7 @@ type action =
 
 let debug = false;;
 
+exception Not_solved;;
 
 let solve_system sys =
     let trans1 eq = match eq with
@@ -132,21 +133,18 @@ let solve_system sys =
         let success = ref false in
         (Queue.of_seq(
             Seq.map
-            (fun el -> match el with
-                | (t1, t2) -> let rt1 = apply_substitution_with_result [subst] t1 in
-                                  let rt2 = apply_substitution_with_result [subst] t2 in
-                                      match rt1, rt2 with (res1, term1), (res2, term2) ->
-                                         success := res1 || res2;
-                                         (term1, term2)
+            (fun (t1, t2) -> let rt1 = apply_substitution_with_result [subst] t1 in
+                                 let rt2 = apply_substitution_with_result [subst] t2 in
+                                     match rt1, rt2 with (res1, term1), (res2, term2) ->
+                                        success := res1 || res2;
+                                        (term1, term2)
             )
             (Queue.to_seq que)
         ), !success) in
 
     let operate_sys sys =
         let eqs_without_accident = ref 0 in
-        let que = ref (Queue.create ()) in
-
-        List.iter (fun el -> Queue.push el !que) sys;
+        let que = ref (Queue.of_seq (List.to_seq sys)) in
 
         (* not to be confused with NOT *)
         while (!eqs_without_accident < Queue.length !que && !eqs_without_accident >= 0) do
@@ -196,6 +194,7 @@ let solve_system sys =
         done;
 
         if (!eqs_without_accident < 0) then None
-        else Some (List.of_seq (Seq.map (fun el -> match el with | (Var v, term) -> (v, term) | (anything, term) -> ("Wrong", anything)) (Queue.to_seq !que))) in
+        else try Some (List.of_seq (Seq.map (fun el -> match el with | (Var v, term) -> (v, term) | (anything, term) -> raise Not_solved) (Queue.to_seq !que)))
+             with e -> if debug then print_string("Not solved :("); None in
 
     operate_sys sys;;
