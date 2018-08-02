@@ -6,6 +6,8 @@ val string_of_eq: (algebraic_term * algebraic_term) -> string
 
 val string_of_system: (algebraic_term * algebraic_term) list -> string
 
+val check_equal: (algebraic_term * algebraic_term) -> bool
+
 (* По списку уравнений вернуть одно уравнение *)
 val system_to_equation: (algebraic_term * algebraic_term) list -> (algebraic_term * algebraic_term)
 
