@@ -102,7 +102,7 @@ let solve_system sys =
 
     let trans3 eq = match eq with
         | (Fun (a, la), Fun (b, lb)) -> if (a = b && List.length la = List.length lb) then Extract
-                                        else Incompatible
+                                        else ((if debug then print_string("transformation 3\n")); Incompatible)
         | _ -> Ok in
 
     let rec check_inclusion var term = match term with
@@ -110,7 +110,7 @@ let solve_system sys =
         | Fun (f, l) -> List.fold_left (||) false (List.map (fun el -> check_inclusion var el) l) in
 
     let trans4 eq = match eq with
-        | (Var v, term) -> if (check_inclusion v term) then Incompatible
+        | (Var v, term) -> if (check_inclusion v term) then ((if debug then print_string("transformation 4\n")); Incompatible)
                            else Subst (v, term)
         | _ -> Ok in
 

@@ -36,12 +36,12 @@ let free_to_subst a b str =
     in free_subst_help b [] false;;
 
 let free_vars a =
-	let rec free_vars_help a used_list = match a with
-		| Var x -> if (List.mem x used_list) then [] else x::[]
-		| App (x, y) -> ((free_vars_help x used_list) @ (free_vars_help y used_list))
-		| Abs (x, lambda) -> (free_vars_help lambda (x::used_list))
+    let rec free_vars_help a used_list = match a with
+        | Var x -> if (List.mem x used_list) then [] else x::[]
+        | App (x, y) -> ((free_vars_help x used_list) @ (free_vars_help y used_list))
+        | Abs (x, lambda) -> (free_vars_help lambda (x::used_list))
 
-	in free_vars_help a [];;
+    in free_vars_help a [];;
 
 let is_alpha_equivalent a b =
     let ctr = ref 0 in

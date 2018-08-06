@@ -17,6 +17,7 @@ type my_type =
     | System of (algebraic_term * algebraic_term) list
     | Solved_system of (string * algebraic_term) list option
     | S_type of simp_type
+    | HM_type of hm_type
 
 let print_bool bl = print_string(string_of_bool bl);;
 
@@ -27,6 +28,8 @@ let print_term term = print_string (string_of_term term);;
 let print_eq eq = print_string (string_of_eq eq);;
 
 let print_s_type s_t = print_string(string_of_s_type s_t);;
+
+let print_hm_type hm_t = print_string(string_of_hm_type hm_t);;
 
 let tab_size = ref 0;;
 
@@ -49,6 +52,7 @@ let rec my_print obj =
                 | None -> my_print(String "No solution, sorry(")
                 | Some sys -> List.iter (fun (var, term) -> my_print (String (var ^ " = " ^ (string_of_term term)))) sys)
             | S_type v -> print_s_type v
+            | HM_type v -> print_hm_type v
             ) in
 
     (match obj with
@@ -183,42 +187,59 @@ let third_hw_tests = Header ("------THIRD HW----", [
         let smart_but_wrong_sys = [(Var "r", Fun ("r", [Var "r"]));(Fun ("e", [Var "a"]), Fun ("e", [Var "a"; Var "b"]))] in
             [Bool (check_solution subst smart_sys);
             Bool (check_solution subst smarter_sys);
-            Bool (check_solution subst smart_but_wrong_sys)]);
+            Bool (check_solution subst smart_but_wrong_sys)])
 
-    T_case ("solve_system",
+    ;T_case ("solve_system",
         let eq1 = (Fun("A", [Var "b"]), Var "a") in
         let eq2 = (Fun("B", [Var "c"; Var "a"]), Fun("B", [Fun("C", []); Var "a"])) in
         let eq3 = (Fun ("fun", [Var "a"]), Fun ("fun", [Var "f"])) in
         let eq4 = (Var "d", Fun("other", [Var "e"])) in
         let sys = [eq1; eq1; eq2; eq3; eq4] in
         let res = solve_system sys in
-        let apply_subst_to_sys subst sys = List.map (fun elem -> match elem with (t1, t2) -> (apply_substitution subst t1, apply_substitution subst t2)) sys in
+        let new_eq = (Fun ("->", [Var "var_type1"; Fun ("->", [Var "var_type4"; Var "var_type4"])]), Fun ("->", [Fun ("->", [Var "var_type1"; Fun ("->", [Var "var_type4"; Var "var_type4"])]); Var "var_type5"])) in
         let check_correctness sys res = match res with
-            | None -> false
-            | Some subst -> let tmp = apply_subst_to_sys subst sys in
-                                List.fold_right (fun (t1, t2) acc -> (check_equal (t1, t2)) && acc) tmp true
-                            in
+                | None -> false
+                | Some subst -> check_solution subst sys in
             [Solved_system res;
-            Bool (check_correctness sys res)])
+            Bool (check_correctness sys res);
+            Solved_system (solve_system [new_eq])]
+            )
 ]);;
 
-(* let fourth_hw_tests = Header ("-----FOURTH HW----\n\n", [
+let fourth_hw_tests = Header ("-----FOURTH HW----\n\n", [
     T_case ("infer_simp_type",
         let lambda1 = Abs ("f", Abs ("x", App (Var "f", App (Var "f", Var "x")))) in
 
         let check_infer_type lambda = match infer_simp_type lambda with
-            | None -> print_string("Failed to infer\n\n")
-            | Some (l, res) -> print_string("Substs:\n");
-                               List.iter (fun (key, s_t) -> print_string(key ^ " = " ^ (string_of_s_type s_t) ^ "\n")) l;
-                               print_string("Inferred type:\n");
-                               print_s_type res;
-                               print_string("\n\n") in
+            | None -> String "Failed to infer"
+            | Some (l, res) -> T_case ("check_type_inference:",
+                                  [String "Substs:"] @
+                                  List.map (fun (key, s_t) -> String (key ^ " = " ^ (string_of_s_type s_t))) l @
+                                  [String ("Inferred type:");
+                                  S_type res]) in
 
             [check_infer_type lambda1;
-            check_infer_type (lambda_of_string "\\a.\\b.\\c.\\d.\\e.\\f.\\g.(a b c d e f g)")])
-]);; *)
+            check_infer_type (lambda_of_string "\\a.\\b.\\c.\\d.\\e.\\f.\\g.(a b c d e f g)")]);
+
+    T_case ("algorithm_w",
+        let l1 = HM_Abs ("kek", HM_Var "kek") in
+        let l2 = HM_Let("w", HM_Abs("f", HM_Abs("x", HM_App(HM_Var("f"), HM_App(HM_Var("f"), HM_Var("x"))))), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_App(HM_Var("w"), HM_Var("w")))))))))))))) in
+
+        let check_algorithm_w lambda = match algorithm_w lambda with
+            | None -> String "Failed to infer"
+            | Some (l, res) -> T_case ("check_algorithm_w:",
+                                  [String "Substs:"] @
+                                  List.map (fun (key, s_t) -> String (key ^ " = " ^ (string_of_hm_type s_t))) l @
+                                  [String ("Inferred type:");
+                                  HM_type res]) in
+        [check_algorithm_w l1;
+        check_algorithm_w l2;
+        check_algorithm_w (HM_Var "x")]
+        (* [] *)
+        )
+]);;
 
 my_print first_hw_tests;;
 my_print second_hw_tests;;
 my_print third_hw_tests;;
-(* my_print fourth_hw_tests;; *)
+my_print fourth_hw_tests;;
