@@ -86,7 +86,6 @@ let algorithm_w lambda =
 
         subst_in_type (T_set.empty) t in
 
-    (* maybe should add case forall a1. forall a1. a1 *)
     let rec choose_var_type acc var v_t = match v_t with
         | HM_ForAll (al, t) -> let bt = new_type() in
                                    choose_var_type (T_map.add al bt acc) var t
@@ -96,18 +95,19 @@ let algorithm_w lambda =
         if T_map.mem var context then choose_var_type (T_map.empty) var (T_map.find var context)
         else raise (Inference_error ("Can't infer type of " ^ var)) in
 
-    (* s2 applied first *)
-    let subst_compose s1 s2 =
-        let new_s2 = T_map.map (fun el -> apply_substitution s1 el) s2 in
-            T_map.union (fun key el1 el2 -> Some el1) new_s2 s1 in
-
     let subst_to_context subst context =
         T_map.map (fun t -> apply_substitution subst t) context in
 
-    let unify t1 t2 =
-        match Hw2_unify.solve_system [(transform_to_term t1, transform_to_term t2)] with
-            | None -> raise (Inference_error ("Can't unify " ^ string_of_hm_type t1 ^ " and " ^ string_of_hm_type t2))
+    let unify lst =
+        match Hw2_unify.solve_system (List.map (fun (k, v) -> (transform_to_term k, transform_to_term v)) lst) with
+            | None -> raise (Inference_error ("Can't unify\n" ^ String.concat "\n" (List.map (fun (k, v) -> string_of_hm_type k ^ " and " ^ string_of_hm_type v) lst)))
             | Some solution -> let tmp = ref T_map.empty in List.iter (fun (key, term) -> tmp := T_map.add key (transform_to_type term) !tmp) solution; !tmp in
+
+    (* s2 applied first *)
+    let subst_compose s1 s2 =
+        let new_s2 = T_map.map (fun el -> apply_substitution s1 el) s2 in
+            let whole = T_map.union (fun key el1 el2 -> Some el1) new_s2 s1 in
+                unify (List.map (fun (k, v) -> (HM_Elem k, v)) (T_map.bindings whole)) in
 
     let rec free_vars hm_lambda b_set = match hm_lambda with
         | HM_Var name -> if not (T_set.mem name b_set) then T_set.singleton name else T_set.empty
@@ -128,8 +128,6 @@ let algorithm_w lambda =
             let free = T_set.diff free_in_t (T_set.inter free_in_t (free_vars_in_context context)) in
                 T_set.fold (fun free_var acc -> HM_ForAll (free_var, acc)) free t in
 
-    (* subst : String, hm_type Map *)
-    (* context : String, hm_type Map *)
     let rec inner_w (context, lambda) = match lambda with
         | HM_Var var ->           let t = assign_var_type context var in
                                       if debug then print_string("Var\n" ^ var ^ "\n" ^ (string_of_hm_type t) ^ "\n\n");
@@ -142,12 +140,11 @@ let algorithm_w lambda =
                                                             print_string("Subst1 content:\n" ^ (String.concat "\n" (List.map (fun (key, s_t) -> (key ^ " = " ^ (string_of_hm_type s_t))) (T_map.bindings subst1))) ^ "\n");
                                                             print_string("Subst2 content:\n" ^ (String.concat "\n" (List.map (fun (key, s_t) -> (key ^ " = " ^ (string_of_hm_type s_t))) (T_map.bindings subst2))) ^ "\n")
                                                             );
-                                              let new_subst = unify (apply_substitution subst2 t1) (HM_Arrow (t2, n_t)) in
+                                              let new_subst = unify [((apply_substitution subst2 t1), (HM_Arrow (t2, n_t)))] in
                                                   let res_subst = subst_compose new_subst (subst_compose subst1 subst2) in
                                                       if debug then print_string("Res subst content:\n" ^ (String.concat "\n" (List.map (fun (key, s_t) -> (key ^ " = " ^ (string_of_hm_type s_t))) (T_map.bindings res_subst))) ^ "\n\n");
                                                       (res_subst, apply_substitution res_subst n_t)
-        (* TODO place where can be wrong *)
-        (* figure out if I should check whether var is already in context *)
+
         | HM_Abs (var, l) ->      let n_t = new_type() in
                                       let (subst1, t1) = inner_w ((T_map.add var n_t context), l) in
                                           if debug then (print_string("Abs\n" ^ (string_of_hm_lambda l) ^ "\n" ^ (string_of_hm_type t1) ^ "\nSubst contents\n");
@@ -157,8 +154,6 @@ let algorithm_w lambda =
         | HM_Let (var, l1, l2) -> let (subst1, t1) = inner_w (context, l1) in
                                       let s1_context = subst_to_context subst1 context in
                                           let var_t = cl_in_context t1 s1_context in
-                                              (* TODO place where can be wrong *)
-                                              (* figure out if I should check whether var is already in context *)
                                               let (subst2, t2) = inner_w (T_map.union (fun key el1 el2 ->Some el2) s1_context (T_map.singleton var var_t), l2) in
                                                   if debug then (print_string("Let\n" ^ (string_of_hm_lambda l1) ^ "\n" ^ (string_of_hm_lambda l2) ^ "\n");
                                                                 print_string((string_of_hm_type t1) ^ "\n" ^ (string_of_hm_type t2) ^ "\n\n")

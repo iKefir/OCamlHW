@@ -146,7 +146,6 @@ let solve_system sys =
         let eqs_without_accident = ref 0 in
         let que = ref (Queue.of_seq (List.to_seq sys)) in
 
-        (* not to be confused with NOT *)
         while (!eqs_without_accident < Queue.length !que && !eqs_without_accident >= 0) do
             if debug then (
                 print_string("eqs_without_accident: ");
@@ -193,6 +192,13 @@ let solve_system sys =
                                                 eqs_without_accident := -2
         done;
 
+        if debug then (
+            print_string("\nqueue length: ");
+            print_int(Queue.length !que);
+            print_string("\n");
+            print_string(string_of_system(List.of_seq(Queue.to_seq !que)));
+            print_string("\n")
+            );
         if (!eqs_without_accident < 0) then None
         else try Some (List.of_seq (Seq.map (fun el -> match el with | (Var v, term) -> (v, term) | (anything, term) -> raise Not_solved) (Queue.to_seq !que)))
              with e -> if debug then print_string("Not solved :("); None in

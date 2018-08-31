@@ -139,16 +139,13 @@ let second_hw_tests = Header ("-----SECOND HW----", [
         String_list (free_vars (lambda_of_string ("\\x.\\y.z \\z.y r")))]);
 
     T_case ("is_alpha_equivalent",
-        [(* Bool (is_alpha_equivalent (lambda_of_string "\\x.\\y.x") (lambda_of_string "\\x.\\y.x"));
+        [Bool (is_alpha_equivalent (lambda_of_string "\\x.\\y.x") (lambda_of_string "\\x.\\y.x"));
         Bool (is_alpha_equivalent (lambda_of_string "\\y.\\x.y") (lambda_of_string "\\x.\\y.x"));
         Bool (is_alpha_equivalent (lambda_of_string "y x") (lambda_of_string "x y"));
         Bool (is_alpha_equivalent (lambda_of_string "(\\x.\\y.\\x.x) a") (lambda_of_string "(\\x.\\y.\\z.x) a"));
         Bool (is_alpha_equivalent (lambda_of_string "\\x.\\subst_arg0.x subst_arg0") (lambda_of_string "\\y.\\subst_arg0.y subst_arg0"));
         Bool (is_alpha_equivalent (lambda_of_string "\\x.\\y.x") (lambda_of_string "b \\x.\\y.x"));
-        Bool (is_alpha_equivalent (lambda_of_string "(var_name2 (\\z.var_name1))") (lambda_of_string "(z (\\z.y))")); *)
-
-        Bool (is_alpha_equivalent (lambda_of_string "\\x1.\\x2.x1 x2") (lambda_of_string "\\y1.\\y2.y2 y1"));
-        Bool (is_alpha_equivalent (lambda_of_string "\\x.\\y.x") (lambda_of_string "\\x.\\y.x"))]);
+        Bool (is_alpha_equivalent (lambda_of_string "(var_name2 (\\z.var_name1))") (lambda_of_string "(z (\\z.y))"))]);
 
     T_case ("is_normal_form",
         [Bool (is_normal_form (lambda_of_string "a"));
@@ -217,7 +214,7 @@ let third_hw_tests = Header ("------THIRD HW----", [
             )
 ]);;
 
-let fourth_hw_tests = Header ("-----FOURTH HW----\n\n", [
+let fourth_hw_tests = Header ("-----FOURTH HW----", [
     T_case ("infer_simp_type",
         let lambda1 = Abs ("f", Abs ("x", App (Var "f", App (Var "f", Var "x")))) in
 
@@ -249,7 +246,7 @@ let fourth_hw_tests = Header ("-----FOURTH HW----\n\n", [
         )
 ]);;
 
-(* my_print first_hw_tests;; *)
+my_print first_hw_tests;;
 my_print second_hw_tests;;
-(* my_print third_hw_tests;; *)
-(* my_print fourth_hw_tests;; *)
+my_print third_hw_tests;;
+my_print fourth_hw_tests;;
